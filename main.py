@@ -8,7 +8,12 @@ import logging # https://github.com/erikdelange/MicroPython-Logging/blob/main/lo
 from charge_controller import ChargeController
 from wifi import wifi_connect
 
-logging.basicConfig(filename="log.txt", filemode='w')
+logging.basicConfig(
+        level=logging.DEBUG,
+        stream_level=logging.DEBUG,        # Console output level
+        filename="log.txt",
+        file_level=logging.DEBUG          # File output level
+        )
 
 # ----------------------------
 # Config (edit as needed)
@@ -19,7 +24,6 @@ class Config:
     poll_interval_seconds = 5  # how often to check solar power
     start_time = 8  # 8 o clock
     end_time = 17  # 17 o clock
-
 
 SSID = "YourSSID"
 PASSWORD = "YourPw"
@@ -45,6 +49,7 @@ def get_seconds_till_wake(cfg):
 # ----------------------------
 async def main():
     cfg = Config()
+    logging.info("Monitoring DTU form %s till %s", cfg.start_time, cfg.end_time)
     try:
         wifi_connect(SSID, PASSWORD)
     except Exception as e:
@@ -61,7 +66,7 @@ async def main():
                 logging.error("Control cycle error: %s", e)
             await asyncio.sleep(cfg.poll_interval_seconds)
         else:
-            await controller.stop_charging()
+            controller.stop_charging()
             
             seconds_till_wake = get_seconds_till_wake(cfg)
             logging.info("Not within specified turn on time frame. Sleep for %s seconds.", seconds_till_wake)

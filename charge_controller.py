@@ -37,25 +37,22 @@ class ChargeController:
                                 enc_rand=enc_rand)
         # Threshold stored in tenths of watts to match what the DTU returns
         self._threshold_x10 = charge_threshold_watts * 10
-        self.is_charging = False
         self.relay_pin = Pin(RELAY_PIN_NUMBER, Pin.OUT)
-        self.relay_pin.value(0)
+        self.stop_charging()
 
     # ------------------------------------------------------------------
     # Relay helpers
     # ------------------------------------------------------------------
 
     def start_charging(self):
-        if not self.is_charging:
-            self.is_charging = True
-            self.relay_pin.value(0)
-            logging.info("[ChargeController] External charging started.")
+        self.is_charging = True
+        self.relay_pin.value(0)
+        logging.info("[ChargeController] External charging started.")
 
     def stop_charging(self):
-        if self.is_charging:
-            self.is_charging = False
-            self.relay_pin.value(1)
-            logging.info("[ChargeController] External charging stopped.")
+        self.is_charging = False
+        self.relay_pin.value(1)
+        logging.info("[ChargeController] External charging stopped.")
 
     # ------------------------------------------------------------------
     # Main control cycle
