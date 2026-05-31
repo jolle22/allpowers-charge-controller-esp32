@@ -15,12 +15,14 @@ the existing logic in BatteryMonitor.
 
 import uasyncio as asyncio
 from machine import Pin
+import logging # https://github.com/erikdelange/MicroPython-Logging/blob/main/logging.py
 
 # Import the proper DTU client from hoymiles-wifi/micropython
 from dtu import DTU as HoymilesDTU
 
 RELAY_PIN_NUMBER = 5  # GPIO5
 
+logging.basicConfig(filename="log.txt", filemode='w')
 
 class ChargeController:
     """
@@ -47,13 +49,13 @@ class ChargeController:
         if not self.is_charging:
             self.is_charging = True
             self.relay_pin.value(0)
-            print("[ChargeController] External charging started.")
+            logging.info("[ChargeController] External charging started.")
 
     def stop_charging(self):
         if self.is_charging:
             self.is_charging = False
             self.relay_pin.value(1)
-            print("[ChargeController] External charging stopped.")
+            logging.info("[ChargeController] External charging stopped.")
 
     # ------------------------------------------------------------------
     # Main control cycle
@@ -67,7 +69,7 @@ class ChargeController:
         data = await self._dtu.get_real_data_new()
 
         if data is None:
-            print("[ChargeController] No response from DTU — skipping cycle.")
+            logging.info("[ChargeController] No response from DTU — skipping cycle.")
             return
 
         # dtu.get_real_data_new() returns active_power in tenths of watts
@@ -82,7 +84,7 @@ class ChargeController:
             # dtu_power is already in W (not tenths) per the hoymiles-wifi parser
             total_power_x10 = data.get("dtu_power", 0) * 10
 
-        print("[ChargeController] Solar power: {:.1f} W  threshold: {:.1f} W".format(
+        logging.info("[ChargeController] Solar power: {:.1f} W  threshold: {:.1f} W".format(
             total_power_x10 / 10, self._threshold_x10 / 10))
 
         if total_power_x10 > self._threshold_x10:

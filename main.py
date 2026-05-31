@@ -4,9 +4,11 @@
 import uasyncio as asyncio
 import time
 import machine
+import logging # https://github.com/erikdelange/MicroPython-Logging/blob/main/logging.py
 from charge_controller import ChargeController
 from wifi import wifi_connect
 
+logging.basicConfig(filename="log.txt", filemode='w')
 
 # ----------------------------
 # Config (edit as needed)
@@ -21,21 +23,6 @@ class Config:
 
 SSID = "YourSSID"
 PASSWORD = "YourPw"
-
-
-# ----------------------------
-# Logging
-# ----------------------------
-def log_info(msg, *args):
-    print("[INFO]", msg % args if args else msg)
-
-
-def log_warn(msg, *args):
-    print("[WARN]", msg % args if args else msg)
-
-
-def log_error(msg, *args):
-    print("[ERROR]", msg % args if args else msg)
 
 
 def is_within_awake_time(cfg):
@@ -61,7 +48,7 @@ async def main():
     try:
         wifi_connect(SSID, PASSWORD)
     except Exception as e:
-        log_warn("WiFi connect failed: %s", e)
+        logging.warning("WiFi connect failed: %s", e)
 
     controller = ChargeController(
         cfg.dtu_ip_address, cfg.charge_threshold_watts)
@@ -71,16 +58,18 @@ async def main():
             try:
                 await controller.control_charging()
             except Exception as e:
-                log_error("Control cycle error: %s", e)
+                logging.error("Control cycle error: %s", e)
             await asyncio.sleep(cfg.poll_interval_seconds)
         else:
+            await controller.stop_charging()
+            
             seconds_till_wake = get_seconds_till_wake(cfg)
-            log_info("Not within specified turn on time frame. Sleep for %s seconds.", seconds_till_wake)
+            logging.info("Not within specified turn on time frame. Sleep for %s seconds.", seconds_till_wake)
 
             machine.deepsleep(seconds_till_wake * 1000)
             
             if machine.reset_cause() == machine.DEEPSLEEP_RESET:
-                print('woke from a deep sleep')
+                logging.info('woke from a deep sleep')
 
 
 if __name__ == "__main__":
