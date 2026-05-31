@@ -4,7 +4,7 @@
 import uasyncio as asyncio
 import time
 import machine
-import logging # https://github.com/erikdelange/MicroPython-Logging/blob/main/logging.py
+import logging # https://github.com/Me-Phew/micropython-logging/blob/main/logging.py
 from charge_controller import ChargeController
 from wifi import wifi_connect
 

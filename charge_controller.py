@@ -15,14 +15,19 @@ the existing logic in BatteryMonitor.
 
 import uasyncio as asyncio
 from machine import Pin
-import logging # https://github.com/erikdelange/MicroPython-Logging/blob/main/logging.py
+import logging # https://github.com/Me-Phew/micropython-logging/blob/main/logging.py
 
 # Import the proper DTU client from hoymiles-wifi/micropython
 from dtu import DTU as HoymilesDTU
 
 RELAY_PIN_NUMBER = 5  # GPIO5
 
-logging.basicConfig(filename="log.txt", filemode='w')
+logging.basicConfig(
+        level=logging.DEBUG,
+        stream_level=logging.DEBUG,        # Console output level
+        filename="log.txt",
+        file_level=logging.DEBUG          # File output level
+        )
 
 class ChargeController:
     """
