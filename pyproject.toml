@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Run pytest from the tests/ subdirectory so the project-root's MicroPython
+# logging.py does not shadow stdlib logging (which pytest itself imports).
+# conftest.py adds the project root back onto sys.path after pytest has
+# already imported stdlib logging.
+addopts = "--import-mode=importlib"

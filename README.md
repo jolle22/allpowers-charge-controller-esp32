@@ -5,3 +5,5 @@ When the hoymiles DTU reports a certain energy production, a relay connected to 
 In my home, this relay is connected to a power outlet, that may charge power-stations, power-banks or phones.
 
 I do hope this helps somebody.
+
+Run tests with: cd tests && python -m pytest -v
