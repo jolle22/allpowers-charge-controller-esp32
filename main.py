@@ -8,16 +8,37 @@ import machine
 import ntptime
 import logging # https://github.com/Me-Phew/micropython-logging/blob/main/logging.py
 from charge_controller import ChargeController
-from wifi import wifi_connect
+from wifi import wifi_connect # https://github.com/jolle22/hoymiles-wifi-micropython/blob/main/wifi.py
 
 logging.basicConfig(
-        level=logging.DEBUG,
-        stream_level=logging.DEBUG,        # Console output level
-        filename="log.txt",
-        file_level=logging.DEBUG          # File output level
-        )
+    level=logging.DEBUG,
+    stream_level=logging.DEBUG,        # Console output level
+    filename="log.txt",
+    file_level=logging.DEBUG          # File output level
+)
 
 UTC_OFFSET_SECONDS = 2 * 3600
+
+
+async def control_charging(cfg, controller):
+    while True:
+        if is_within_awake_time(cfg):
+            try:
+                await controller.control_charging()
+            except Exception as e:
+                logging.error("Control cycle error: %s", e)
+            await asyncio.sleep(cfg.poll_interval_seconds)
+        else:
+            controller.stop_charging()
+
+            seconds_till_wake = get_seconds_till_wake(cfg)
+            logging.info(
+                "Not within specified turn on time frame. Sleep for %s seconds.", seconds_till_wake)
+
+            machine.deepsleep(seconds_till_wake * 1000)
+
+            if machine.reset_cause() == machine.DEEPSLEEP_RESET:
+                logging.info('woke from a deep sleep')
 
 
 def set_time(utc_off_set_in_seconds):
@@ -54,7 +75,8 @@ def get_seconds_till_wake(cfg):
 # ----------------------------
 async def main():
     cfg = config.Config()
-    logging.info("Monitoring DTU form %s till %s", cfg.start_time, cfg.end_time)
+    logging.info("Monitoring DTU form %s till %s",
+                 cfg.start_time, cfg.end_time)
     try:
         wifi_connect(cfg.ssid, cfg.password)
     except Exception as e:
@@ -65,23 +87,7 @@ async def main():
     controller = ChargeController(
         cfg.dtu_ip_address, cfg.charge_threshold_watts)
 
-    while True:
-        if is_within_awake_time(cfg):
-            try:
-                await controller.control_charging()
-            except Exception as e:
-                logging.error("Control cycle error: %s", e)
-            await asyncio.sleep(cfg.poll_interval_seconds)
-        else:
-            controller.stop_charging()
-
-            seconds_till_wake = get_seconds_till_wake(cfg)
-            logging.info("Not within specified turn on time frame. Sleep for %s seconds.", seconds_till_wake)
-
-            machine.deepsleep(seconds_till_wake * 1000)
-
-            if machine.reset_cause() == machine.DEEPSLEEP_RESET:
-                logging.info('woke from a deep sleep')
+    control_charging(cfg, controller)
 
 
 if __name__ == "__main__":

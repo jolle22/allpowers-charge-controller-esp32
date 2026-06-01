@@ -4,7 +4,6 @@ Tests for main.py — is_within_awake_time and get_seconds_till_wake.
 MicroPython-specific modules are stubbed so these tests run under
 standard CPython (pytest / unittest).
 """
-
 import sys
 import types
 import unittest
@@ -14,12 +13,14 @@ from unittest.mock import MagicMock, patch
 # Stub MicroPython modules before importing main
 # ---------------------------------------------------------------------------
 
+
 def _stub_module(name, **attrs):
     mod = types.ModuleType(name)
     for k, v in attrs.items():
         setattr(mod, k, v)
     sys.modules[name] = mod
     return mod
+
 
 # uasyncio
 _stub_module("uasyncio")
@@ -40,7 +41,7 @@ _stub_module("wifi", wifi_connect=MagicMock())
 _stub_module("dtu", DTU=MagicMock())
 
 # Redirect the local logging.py so basicConfig doesn't write files
-_logging_stub = _stub_module(
+_stub_module(
     "logging",
     basicConfig=MagicMock(),
     info=MagicMock(),
@@ -49,6 +50,8 @@ _logging_stub = _stub_module(
     debug=MagicMock(),
     DEBUG=10,
 )
+
+_stub_module("ntptime", settime=MagicMock())
 
 # charge_controller depends on the same stubs — import it first so the
 # module object is cached before main.py imports it
@@ -68,6 +71,7 @@ import main  # noqa: E402
 
 class _Cfg:
     """Minimal Config-alike for passing into the pure functions."""
+
     def __init__(self, start_time=8, end_time=17):
         self.start_time = start_time
         self.end_time = end_time
