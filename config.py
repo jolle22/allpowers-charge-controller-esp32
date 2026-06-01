@@ -8,4 +8,4 @@ class Config:
     end_time = 17  # 17 o clock
     ssid = "YourSSID"
     password = "YourPw"
-    utcOffsetInSeconds=2 * 3600  # UTC+2 (CEST), change to 1 * 3600 in winter (CET)
+    utc_off_set_in_seconds=2 * 3600  # UTC+2 (CEST), change to 1 * 3600 in winter (CET)

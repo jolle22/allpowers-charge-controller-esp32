@@ -20,6 +20,16 @@ logging.basicConfig(
 UTC_OFFSET_SECONDS = 2 * 3600
 
 
+def set_time(utc_off_set_in_seconds):
+    try:
+        ntptime.settime()
+        global UTC_OFFSET_SECONDS
+        UTC_OFFSET_SECONDS = utc_off_set_in_seconds
+        logging.info("NTP sync done, UTC time: %s", time.localtime())
+    except Exception as e:
+        logging.warning("NTP setup failed: %s", e)
+
+
 def local_time():
     return time.localtime(time.time() + UTC_OFFSET_SECONDS)
 
@@ -50,13 +60,7 @@ async def main():
     except Exception as e:
         logging.warning("WiFi connection failed: %s", e)
 
-    try:
-        ntptime.settime()
-        global UTC_OFFSET_SECONDS
-        UTC_OFFSET_SECONDS = cfg.utcOffsetInSeconds
-        logging.info("NTP sync done, UTC time: %s", time.localtime())
-    except Exception as e:
-        logging.warning("NTP setup failed: %s", e)
+    set_time(cfg.utc_off_set_in_seconds)
 
     controller = ChargeController(
         cfg.dtu_ip_address, cfg.charge_threshold_watts)
