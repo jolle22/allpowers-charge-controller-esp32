@@ -8,7 +8,7 @@ import machine
 import ntptime
 import logging # https://github.com/Me-Phew/micropython-logging/blob/main/logging.py
 from charge_controller import ChargeController
-from wifi import wifi_connect # https://github.com/jolle22/hoymiles-wifi-micropython/blob/main/wifi.py
+from wifi import wifi_connect
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -86,8 +86,7 @@ async def main():
 
     controller = ChargeController(
         cfg.dtu_ip_address, cfg.charge_threshold_watts)
-
-    control_charging(cfg, controller)
+    await control_charging(cfg, controller)
 
 
 if __name__ == "__main__":

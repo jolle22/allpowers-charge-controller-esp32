@@ -15,7 +15,7 @@ the existing logic in BatteryMonitor.
 
 import uasyncio as asyncio
 from machine import Pin
-import logging # https://github.com/Me-Phew/micropython-logging/blob/main/logging.py
+import logging # https://github.com/erikdelange/MicroPython-Logging/blob/main/logging.py
 
 # Import the proper DTU client from hoymiles-wifi/micropython
 from dtu import DTU as HoymilesDTU
