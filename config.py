@@ -9,3 +9,5 @@ class Config:
     ssid = "YourSSID"
     password = "YourPw"
     utc_off_set_in_seconds=2 * 3600  # UTC+2 (CEST), change to 1 * 3600 in winter (CET)
+    telegram_token = "1111111:AAAAAAAAAAA111AAAAAAAAAAAA"
+    telegram_chat_id = "11111"
